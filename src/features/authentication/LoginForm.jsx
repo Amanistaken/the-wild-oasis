@@ -2,17 +2,34 @@ import { useState } from "react";
 import Button from "../../ui/Button";
 import Form from "../../ui/Form";
 import Input from "../../ui/Input";
-import FormRowVertical from "../../ui/FormRowVertical";
+import FormRow from "../../ui/FormRow";
+import { useLogin } from "./useLogin";
+import SpinnerMini from "../../ui/SpinnerMini";
+// import { login } from "../../services/apiAuth";
+// import { login } from "../../services/apiAuth";
 
 function LoginForm() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("aman@gmail.com");
+  const [password, setPassword] = useState("09876532");
+  const { isPending, Login } = useLogin();
 
-  function handleSubmit() {}
+  function handleSubmit(e) {
+    e.preventDefault();
+    if (!email || !password) return;
+    Login(
+      { email, password },
+      {
+        onSettled: () => {
+          setEmail("");
+          setPassword("");
+        },
+      }
+    );
+  }
 
   return (
     <Form onSubmit={handleSubmit}>
-      <FormRowVertical label="Email address">
+      <FormRow label="Email address">
         <Input
           type="email"
           id="email"
@@ -20,20 +37,24 @@ function LoginForm() {
           autoComplete="username"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          disabled={isPending}
         />
-      </FormRowVertical>
-      <FormRowVertical label="Password">
+      </FormRow>
+      <FormRow label="Password">
         <Input
           type="password"
           id="password"
           autoComplete="current-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          disabled={isPending}
         />
-      </FormRowVertical>
-      <FormRowVertical>
-        <Button size="large">Login</Button>
-      </FormRowVertical>
+      </FormRow>
+      <FormRow>
+        <Button size="large" disabled={isPending}>
+          {!isPending ? "Login" : <SpinnerMini />}
+        </Button>
+      </FormRow>
     </Form>
   );
 }

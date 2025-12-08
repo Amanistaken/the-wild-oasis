@@ -11,6 +11,7 @@ import DataItem from "../../ui/DataItem";
 import { Flag } from "../../ui/Flag";
 
 import { formatDistanceFromNow, formatCurrency } from "../../utils/helpers";
+import PropTypes from "prop-types";
 
 const StyledBookingDataBox = styled.section`
   /* Box */
@@ -77,9 +78,9 @@ const Price = styled.div`
   margin-top: 2.4rem;
 
   background-color: ${(props) =>
-    props.isPaid ? "var(--color-green-100)" : "var(--color-yellow-100)"};
+    props.$isPaid ? "var(--color-green-100)" : "var(--color-yellow-100)"};
   color: ${(props) =>
-    props.isPaid ? "var(--color-green-700)" : "var(--color-yellow-700)"};
+    props.$isPaid ? "var(--color-green-700)" : "var(--color-yellow-700)"};
 
   & p:last-child {
     text-transform: uppercase;
@@ -104,9 +105,9 @@ const Footer = styled.footer`
 // A purely presentational component
 function BookingDataBox({ booking }) {
   const {
-    created_at,
-    startDate,
-    endDate,
+    created_at = null,
+    startDate = null,
+    endDate = null,
     numNights,
     numGuests,
     cabinPrice,
@@ -115,8 +116,14 @@ function BookingDataBox({ booking }) {
     hasBreakfast,
     observations,
     isPaid,
-    guests: { fullName: guestName, email, country, countryFlag, nationalID },
-    cabins: { name: cabinName },
+    guests: {
+      fullName: guestName,
+      email,
+      country,
+      countryFlag,
+      nationalID,
+    } = {},
+    cabins: { name: cabinName } = {},
   } = booking;
 
   return (
@@ -130,11 +137,17 @@ function BookingDataBox({ booking }) {
         </div>
 
         <p>
-          {format(new Date(startDate), "EEE, MMM dd yyyy")} (
+          {startDate && !isNaN(new Date(startDate))
+            ? format(new Date(startDate), "EEE, MMM dd yyyy")
+            : ""}
+          (
           {isToday(new Date(startDate))
             ? "Today"
             : formatDistanceFromNow(startDate)}
-          ) &mdash; {format(new Date(endDate), "EEE, MMM dd yyyy")}
+          ) &mdash;{" "}
+          {endDate && !isNaN(new Date(endDate))
+            ? format(new Date(endDate), "EEE, MMM dd yyyy")
+            : ""}
         </p>
       </Header>
 
@@ -163,13 +176,13 @@ function BookingDataBox({ booking }) {
           {hasBreakfast ? "Yes" : "No"}
         </DataItem>
 
-        <Price isPaid={isPaid}>
+        <Price $isPaid={isPaid}>
           <DataItem icon={<HiOutlineCurrencyDollar />} label={`Total price`}>
             {formatCurrency(totalPrice)}
 
             {hasBreakfast &&
               ` (${formatCurrency(cabinPrice)} cabin + ${formatCurrency(
-                extrasPrice
+                extrasPrice 
               )} breakfast)`}
           </DataItem>
 
@@ -178,10 +191,42 @@ function BookingDataBox({ booking }) {
       </Section>
 
       <Footer>
-        <p>Booked {format(new Date(created_at), "EEE, MMM dd yyyy, p")}</p>
+        <p>
+          Booked{" "}
+          {created_at && !isNaN(new Date(created_at))
+            ? format(new Date(created_at), "EEE, MMM dd yyyy, p")
+            : ""}
+        </p>
       </Footer>
     </StyledBookingDataBox>
   );
 }
+
+BookingDataBox.propTypes = {
+  booking: PropTypes.object,
+  created_at: PropTypes.string,
+  startDate: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  endDate: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  numNights: PropTypes.number,
+  numGuests: PropTypes.number,
+  cabinPrice: PropTypes.number,
+  extrasPrice: PropTypes.number,
+  totalPrice: PropTypes.number,
+  hasBreakfast: PropTypes.bool,
+  observations: PropTypes.string,
+  isPaid: PropTypes.bool,
+
+  guests: PropTypes.shape({
+    fullName: PropTypes.string,
+    email: PropTypes.string,
+    country: PropTypes.string,
+    countryFlag: PropTypes.string,
+    nationalID: PropTypes.string,
+  }),
+
+  cabins: PropTypes.shape({
+    name: PropTypes.string,
+  }),
+};
 
 export default BookingDataBox;

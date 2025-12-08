@@ -83,13 +83,25 @@ async function createBookings() {
       status = "checked-in";
 
     return {
-      ...booking,
-      numNights,
+      created_at: booking.created_at ?? new Date().toISOString(),
+
+      startDate: booking.startDate,
+      endDate: booking.endDate,
+
+      hasBreakfast: booking.hasBreakfast,
+      observations: booking.observations,
+      isPaid: booking.isPaid,
+
+      numGuests: booking.numGuests,
+      numNights: numNights,
+
       cabinPrice,
-      extrasPrice,
+      extraPrice: booking.extraPrice,
       totalPrice,
+
       guestId: allGuestIds.at(booking.guestId - 1),
       cabinId: allCabinIds.at(booking.cabinId - 1),
+
       status,
     };
   });
